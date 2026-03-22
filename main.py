@@ -38,6 +38,7 @@ parameters={"lat":KR_LAT,
             "appid": os.environ.get("OWM_API_KEY")
 #            "appid":api_key_p
 }
+print(f"Results:  {os.environ.get("OWM_API_KEY")}")
 response = requests.get(url=url, params = parameters)
 response.raise_for_status()
 try:
