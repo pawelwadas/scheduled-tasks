@@ -35,7 +35,7 @@ parameters={"lat":KR_LAT,
             "lon":KR_LON,
             "units":"metric",
             "cnt":4, #only 4 timestamps
-            "appid": os.environ["OWM_API_KEY"]
+            "appid": os.environ.get("OWM_API_KEY")
 #            "appid":api_key_p
 }
 response = requests.get(url=url, params = parameters)
