@@ -35,13 +35,11 @@ parameters={"lat":KR_LAT,
             "appid": os.environ.get("OWM_API_KEY")
 #            "appid":api_key_p
 }
-print(f"Results:  {os.environ.get("OWM_API_KEY")}")
 response = requests.get(url=url, params = parameters)
 response.raise_for_status()
 try:
     x = response.json()
     #position = (response.json()["iss_position"]["longitude"], response.json()["iss_position"]["latitude"])
-    print(f"Results:  {x["list"]}")
     print(f"Current weather:  {x["list"][0]['weather'][0]['description']}")
     # print(f" Results  {x["list"][0]['weather'][0]['id']}") #id is giving weather code - see documentation
     for wf in x["list"]:
