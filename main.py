@@ -25,7 +25,7 @@ KR_LAT=43.608292
 KR_LON=3.879600
 
 twilio_account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-twilio_auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+twilio_auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
 
 # https://api.openweathermap.org/data/2.5/weather?q=London,UK&appid=558ea258d23edafcd8588309d3edc612
 #api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
