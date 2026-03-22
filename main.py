@@ -1,38 +1,67 @@
-# To run and test the code you need to update 4 places:
-# 1. Change MY_EMAIL/MY_PASSWORD to your own details.
-# 2. Go to your email provider and make it allow less secure apps.
-# 3. Update the SMTP ADDRESS to match your email provider.
-# 4. Update birthdays.csv to contain today's month and day.
-# See the solution video in the 100 Days of Python Course for explainations.
-
-
-from datetime import datetime
-import pandas
-import random
-import smtplib
+import requests
 import os
+from twilio.rest import Client
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+#get location
+# api https://api.openweathermap.org/geo/1.0/direct?q=Krakow,PL&appid=558ea258d23edafcd8588309d3edc612
+# or in latlong.net
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
+#json viewer https://jsonviewer.stack.hu/
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
+#sms https://console.twilio.com/dashboard?variant_override=non-dev
+#whatsapp https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn
+#run code pythonanywhere.com
+#envs
+# lista  dir Env:
+# ustawienie  setx OWM_API_KEY "zzzzzzzzzzzzzzzzzzzzzzzzzzzz" ale to nie działa
+#              unix export OWM_API_KEY=zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+#apilist.fun
+
+KR_LAT=50.0619474
+KR_LON=19.9368564
+
+twilio_account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+twilio_auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+
+# https://api.openweathermap.org/data/2.5/weather?q=London,UK&appid=558ea258d23edafcd8588309d3edc612
+#api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
+
+url = 'https://api.openweathermap.org/data/2.5/forecast'
+parameters={"lat":KR_LAT,
+            "lon":KR_LON,
+            "units":"metric",
+            "cnt":4, #only 4 timestamps
+            "appid": os.environ["OWM_API_KEY"]
+#            "appid":api_key_p
+}
+response = requests.get(url=url, params = parameters)
+response.raise_for_status()
+try:
+    x = response.json()
+    #position = (response.json()["iss_position"]["longitude"], response.json()["iss_position"]["latitude"])
+    print(f"Results:  {x["list"]}")
+    print(f"Current weather:  {x["list"][0]['weather'][0]['description']}")
+    # print(f" Results  {x["list"][0]['weather'][0]['id']}") #id is giving weather code - see documentation
+    for wf in x["list"]:
+        if int(wf['weather'][0]['id'])< 700:
+            print('! Bring an Umbrella, it is going to rain or snow in next 12h')
+            #sms
+            client = Client(twilio_account_sid, twilio_auth_token)
+            message = client.messages.create(
+                body="\nBring an Umbrella, it is going to rain or snow in next 12h",
+                from_="+17754427191",
+                to="+48538159944",
+            )
+            #whatsapp
+            # message = client.messages.create(
+            #     from_='whatsapp:+14155238886',
+            #     body='Bring an Umbrella, it is going to rain or snow in next 12h',
+            #     to='whatsapp:+48538159944'
+            # )
+            #print(message.status)
+            break
+
+    #print(f" sunrise hour {x["results"]["sunrise"].split("T")[1].split(":")[0]}  sunset hour {x["results"]["sunset"].split("T")[1].split(":")[0]}")
+except requests.exceptions.JSONDecodeError:
+    print("Response is not valid JSON:", response.text)
