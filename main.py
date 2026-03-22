@@ -20,9 +20,6 @@ from twilio.rest import Client
 
 KR_LAT=50.0619474
 KR_LON=19.9368564
-#test FR
-KR_LAT=43.608292
-KR_LON=3.879600
 
 twilio_account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
 twilio_auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
